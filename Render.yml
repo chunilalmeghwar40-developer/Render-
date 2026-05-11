@@ -1,0 +1,44 @@
+# render.yml - Minecraft Bedrock + Playit.gg for Render.com
+services:
+  # Bedrock Server Service
+  bedrock-server:
+    image: itzg/minecraft-bedrock-server:latest
+    container_name: bedrock
+    environment:
+      - EULA=TRUE
+      - SERVER_PORT=19132
+      - GAMEMODE=survival
+      - DIFFICULTY=easy
+      - LEVEL_NAME=Bedrock Level
+      - MAX_PLAYERS=10
+    ports:
+      - "19132:19132/udp"
+    volumes:
+      - bedrock-data:/data
+    restart: unless-stopped
+    networks:
+      - minecraft-network
+
+  # Playit.gg Tunnel Service
+  playit-tunnel:
+    image: ghcr.io/playit-cloud/playit-agent:latest
+    container_name: playit
+    environment:
+      - SECRET_KEY=${PLAYIT_SECRET_KEY}  # Render.com secrets mein set karna
+    volumes:
+      - playit-data:/etc/playit
+    restart: unless-stopped
+    networks:
+      - minecraft-network
+    depends_on:
+      - bedrock-server
+
+# Networks
+networks:
+  minecraft-network:
+    driver: bridge
+
+# Volumes for persistent storage
+volumes:
+  bedrock-data:
+  playit-data:
